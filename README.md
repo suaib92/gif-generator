@@ -119,5 +119,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - The README covers project setup, tech stack, usage, deployment, and contribution guidelines.
 - It provides instructions for both frontend and backend setup and includes environment variable setup.
 - Links to live versions and licenses are included for clarity.
-
-Feel free to modify any specific details like repository name, deployment URLs, or additional customizations.
