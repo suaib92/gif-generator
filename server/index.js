@@ -97,7 +97,7 @@ app.post("/api/generate-gif", async (req, res) => {
     // Send the URL of the saved GIF back to the client
     // Correct the URL string here
     return res.status(200).json({
-      gifUrl: `http://localhost:${port}/generated.gif`, // Use template literal here
+      gifUrl: `https://gif-generator-wbgn.onrender.com/generated.gif`, // Use template literal here
       status: "success",
       message: "GIF generated successfully",
     });
