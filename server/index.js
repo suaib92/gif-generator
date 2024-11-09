@@ -20,7 +20,7 @@ if (!segmindApiUrl || !segmindApiKey) {
 
 // CORS setup
 const corsOptions = {
-    origin: 'http://localhost:5173',  // Adjust if needed
+    origin: 'http://localhost:5173',  // Adjust if needed for your frontend
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'x-api-key'],
 };
@@ -49,73 +49,72 @@ async function imageUrlToBase64(imageUrl) {
     return Buffer.from(response.data, 'binary').toString('base64');
 }
 
-app.post('/api/generate-gif', async (req, res) => {
+app.post("/api/generate-gif", async (req, res) => {
+    console.log("Received request body:", req.body);
     const { imageData } = req.body;
-
-    // Check if imageData is provided
     if (!imageData) {
-        console.error('No image data received');
-        return res.status(400).json({ error: 'No image data provided. Please include "imageData" in your request body.' });
+      console.error("No image data received");
+      return res.status(400).json({
+        error: 'No image data provided',
+        details: 'Please upload an image first'
+      });
     }
-
-    // Ensure imageData starts with the MIME type
-    if (!isValidBase64Image(imageData)) {
-        console.error('Invalid image data format');
-        return res.status(400).json({ error: 'Invalid image data format. Ensure it includes the MIME type (e.g., data:image/jpeg;base64,).' });
-    }
-
     try {
-        console.log('Sending image data to Segmind API...');
-
-        // Create a new FormData instance
-        const form = new FormData();
-        form.append('face_image', imageData); // Append the image data to the form
-
-        const headers = {
-            ...form.getHeaders(),
-            'x-api-key': segmindApiKey,
-        };
-
-        // Send the request using axios with form-data
-        const response = await axios.post(segmindApiUrl, form, { headers });
-
-        console.log('Segmind API response:', response.data);
-
-        // Check for the expected output URL in the response
-        if (response.data && response.data.output_url) {
-            return res.status(200).json({ gifUrl: response.data.output_url });
-        } else {
-            console.error('Unexpected response format from Segmind API:', response.data);
-            return res.status(500).json({
-                error: 'Unexpected response format from Segmind API',
-                details: response.data,
-            });
-        }
+      console.log("Processing image data...");
+      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, "");
+      if (!base64Data) {
+        return res.status(400).json({
+          error: 'Invalid base64 data',
+          details: 'The provided image data is not in valid base64 format'
+        });
+      }
+      const form = new FormData();
+      form.append("face_image", base64Data);
+      form.append("driving_video", "https://segmind-sd-models.s3.amazonaws.com/display_images/liveportrait-video.mp4");
+      form.append("live_portrait_dsize", "512");
+      form.append("live_portrait_scale", "2.3");
+      form.append("video_frame_load_cap", "128");
+      form.append("live_portrait_lip_zero", "true");
+      form.append("live_portrait_relative", "true");
+      form.append("live_portrait_vy_ratio", "-0.12");
+      form.append("live_portrait_stitching", "true");
+      form.append("video_select_every_n_frames", "1");
+      const headers = {
+        ...form.getHeaders(),
+        "x-api-key": segmindApiKey,
+      };
+      console.log("Sending request to Segmind API...");
+      const response = await axios.post(segmindApiUrl, form, {
+        headers,
+        timeout: 120000,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      });
+      console.log("API Response:", response.data);
+      return res.status(200).json({
+        gifUrl: response.data.output_url || response.data.url,
+        status: "success",
+        message: "GIF generated successfully"
+      });
     } catch (error) {
-        console.error('Error during Segmind API call:', error.message);
-
-        if (error.response) {
-            console.error('Segmind API error response:', error.response.data);
-            return res.status(error.response.status || 500).json({
-                error: 'Failed to generate GIF from Segmind API',
-                details: error.response.data,
-            });
-        } else if (error.code === 'ECONNABORTED') {
-            console.error('Request to Segmind API timed out');
-            return res.status(504).json({ error: 'Request to Segmind API timed out. Please try again.' });
-        } else {
-            console.error('Network or unknown error:', error.message);
-            return res.status(500).json({
-                error: 'Failed to generate GIF',
-                details: error.message,
-            });
-        }
+      console.error("Error during Segmind API call:", error.message);
+      if (error.code === "ECONNABORTED") {
+        return res.status(504).json({
+          error: "Request is taking longer than expected",
+          status: "processing"
+        });
+      }
+      return res.status(500).json({
+        error: "Failed to process request",
+        details: error.message,
+        status: "failed"
+      });
     }
-});
+  });
 
 // Function to test Segmind API with a direct image URL converted to Base64
 async function testSegmindApi() {
-    const apiKey = process.env.SEGMIND_API_KEY; // Make sure you set your API key
+    const apiKey = process.env.SEGMIND_API_KEY; // Ensure the API key is correct
     const imageUrl = "https://segmind-sd-models.s3.amazonaws.com/display_images/liveportrait-input.jpg"; // Example image URL
 
     try {
