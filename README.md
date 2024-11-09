@@ -76,8 +76,8 @@ Before you begin, ensure that you have the following installed:
 
 This project has been deployed on Render (backend) and Vercel (frontend). You can access the live version of the app:
 
-- **Frontend**: [https://gif-generator-six-alpha.vercel.app](https://gif-generator-six-alpha.vercel.app)
-- **Backend**: [https://gif-generator-wbgn.onrender.com](https://gif-generator-wbgn.onrender.com)
+- **Frontend**: [[https://gif-generator-six-alpha.vercel.app](https://gif-generator-six-alpha.vercel.app)](https://gif-generator-six-alpha.vercel.app/)
+- **Backend**: [[https://gif-generator-wbgn.onrender.com](https://gif-generator-wbgn.onrender.com)](https://gif-generator-wbgn.onrender.com)
 
 ## How to Use
 
