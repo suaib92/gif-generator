@@ -1,8 +1,13 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()], // This enables React support for Vite
-  
-})
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://gif-generator-wbgn.onrender.com', // Your backend URL
+        changeOrigin: true,
+        secure: false, // Set this to `true` if you're using HTTPS on the backend
+      },
+    },
+  },
+});

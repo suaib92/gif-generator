@@ -18,7 +18,7 @@ if (!segmindApiUrl || !segmindApiKey) {
 }
 // CORS setup
 const corsOptions = {
-  origin: "https://gif-generator-six-alpha.vercel.app/", // Adjust if needed
+  origin: "https://gif-generator-six-alpha.vercel.app", // Adjust if needed
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type", "x-api-key"],
 };
